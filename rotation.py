@@ -3,6 +3,7 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 import os
 import scipy.stats as stats
+import imutils
 
 
 
@@ -93,11 +94,35 @@ def slope_pcb(img) :
 
 
 
+## Fonctions utiles
+
+def tourner_image(image, pente):
+    return imutils.rotate(image, np.arctan(pente))
+
+def trouver_la_paire(fichier, dossier):
+    bname=os.path.basename(fichier)
+    if "AfterBonding" in bname:
+        name=bname[:bname.find("AfterBonding")]
+        for f in os.listdir(dossier):
+            if "Reception" in os.path.basename(f):
+                if os.path.basename(f)[:os.path.basename(f).find("Reception")]==name:
+                    return f
+    elif "Reception" in bname:
+        name=bname[:bname.find("Reception")]
+        for f in os.listdir(dossier):
+            if "AfterBonding" in os.path.basename(f):
+                if os.path.basename(f)[:os.path.basename(f).find("AfterBonding")]==name:
+                    return f
+    return "Pas de paire"
+
+
+
+
 
 def rotation_mires(path): #prend en argument une image cablée, renvoie la rotation des mires.
     img_cablee = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    img_non_cablee = cv.imread(path, cv.IMREAD_GRAYSCALE) #TODO : changer
+    img_non_cablee = cv.imread(trouver_la_paire(path,"ModulePictures"), cv.IMREAD_GRAYSCALE) #TODO : changer
 
     relative_slope = slope_pcb(img_non_cablee) - mires(img_non_cablee)[1]
 
-    return slope_pcb(img_cablee) - relative_slope
+    return tourner_image(img_cablee, slope_pcb(img_cablee) - relative_slope)

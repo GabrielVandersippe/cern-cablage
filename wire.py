@@ -247,7 +247,7 @@ def crop_colonnes_right (image_grey_crop, level = 100) :
     return (right)
 
 
-def test_wire_number_v2 (file_name, data) :
+def test_wire_number (file_name, data) :
     expected_nb = expected_wire_number(extract_serial_number(file_name), data)
     image = cv2.imread("ModulePictures/" + file_name)
     n = image.shape[1]

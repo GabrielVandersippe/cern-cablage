@@ -5,6 +5,8 @@ import scipy
 from collections import deque
 import json
 
+with open("iref_trim_per_module.json", "r") as f:
+    data = json.load(f)
 
 # Utils functions for analyzing pixels in general
 

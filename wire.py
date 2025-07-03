@@ -1,7 +1,7 @@
-# Useful libraries
-
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
+import scipy
 from collections import deque
 
 
@@ -167,3 +167,91 @@ def isTouching(wire: list, threshold = 2900) -> bool:
     Returns : bool
     """
     return len(wire) > threshold
+
+
+
+# Définir une zone verticale de recherche de fils (entre high et low)
+
+def crop_lignes (image_grey) :
+    image_bw = cv2.threshold(image_grey, 127,255,cv2.THRESH_BINARY_INV)[1]
+    n = image_bw.shape[0]
+    limit_high = 0
+    x = image_bw[limit_high].mean()
+    while (limit_high < n//2) and (x <= 150) :
+        limit_high+=1
+        x = image_bw[limit_high].mean()
+    limit_low = n-1
+    x = image_bw[limit_low].mean()
+    while (limit_low > n//2) and (x <= 150) :
+        limit_low-=1
+        x = image_bw[limit_low].mean()
+    return (limit_high + 20, limit_low - 30)
+
+
+
+# Compter le nombre de fils à gauche et à droite
+
+def count (image_grey_crop, column_left, column_right) :
+    peaks_left, _ = scipy.signal.find_peaks(image_grey_crop[:,column_left], distance=3, prominence=50, height=190, width=(0,9))
+    peaks_right, _ = scipy.signal.find_peaks(image_grey_crop[:,column_right], distance=3, prominence=50, height=190, width=(0,9))
+    return (peaks_left.shape[0], peaks_right.shape[0])
+
+
+def crop_colonnes (image_grey_crop, level = 100) :
+    n = image_grey_crop.shape[1]
+    left = 0
+    right = n-1
+    count_left, count_right = count(image_grey_crop, left, right)
+    while ((count_left < level) or (count_right < level)) and (left < n) and (right > 0) :
+        if (count_left < level) :
+            left += 1
+        if (count_right < level) :
+            right -= 1
+        count_left, count_right = count(image_grey_crop, left, right)
+    return (left, right)
+
+
+def crop (image_grey) :
+    high, low = crop_lignes(image_grey)
+    grey_cropped_lignes = image_grey[high:low]
+    left, right = crop_colonnes(grey_cropped_lignes)
+    return (high, low, left, right)
+
+
+
+# Donner la position des fils trouvés
+
+def wire_pos (image) :
+    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    high, low, left, right = crop(grey)
+    grey_crop = grey[high:low]
+    peaks_left, _ = scipy.signal.find_peaks(grey_crop[:,left+35], distance=3, prominence=50, height=190, width=(0,9))
+    peaks_right, _ = scipy.signal.find_peaks(grey_crop[:,right-35], distance=3, prominence=50, height=190, width=(0,9))
+    return(peaks_left + high, left+35, peaks_right + high, right-35)
+
+
+
+# Combining start pixel detection and wire plotting
+
+def analyseWires(img: np.ndarray):
+    """Highlights all the wires in an image, with different colors if a pixel is touching another.
+
+    Arguments : 
+
+    img - array of pixels : the working image
+    """
+    copy = img.copy()
+    (x_list_left,y_left,x_list_right,y_right) = wire_pos(img)
+    for (x_list, y) in [(x_list_left,y_left),(x_list_right,y_right)]:
+        for x in x_list:
+            wire = bfsWire(img,(x,y))
+            if isTouching(wire):
+                for pixel in wire:
+                    copy[pixel[0],pixel[1],:] = np.array([0,0,255])
+            else:
+                for pixel in wire:
+                    copy[pixel[0],pixel[1],:] = np.array([255,0,0])
+            edges = wireEdges(wire)
+            copy[edges[0][0],edges[0][1],:] = np.array([0,255,0])
+            copy[edges[1][0],edges[1][1],:] = np.array([0,255,0])
+    cv2.imwrite("result.jpg",copy)

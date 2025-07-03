@@ -1,37 +1,32 @@
-# 1005
-GA1 = bit 8 (3 fils/4) = 19 trous
-GA2 = bit 8 (3 fils/4) = 23 trous
-42 trous
+# TEST
+nb de fils à gauche / nb de fils total
 
-=> 354 fils
+# 20UPGM23211355_PPPV2_46_AfterBonding.jpg
+351 / 700
 
-GA3 = bit 9 (2 fils/4) = 19 trous 
-GA4 = bit 7 (1 fil/4) = 29 trous
-48 trous
+# P1008_20UPGM23210595_AfterWirebonding.jpg
+352 / 700
 
-=> 348 fils
+# P1014_20UPGM23211689_AfterWirebonding.jpg
+351 / 699
 
-Au total : 702 fils
+# P1015_20UPGM23210321_AfterWirebonding.jpg
+352 / 701
 
+# P1017_20UPGM23211308_AfterWirebonding.jpg
+352 / 701
 
-# PPPV2
-GA1 = bit 11 (1/4)
-GA2 = bit 9 (2/4)
-GA3 = bit 6 (2/4)
-GA4 = bit 10 (2/4)
-=> 700 fils
+# P1018_20UPGM23211497_AfterWirebonding.jpg
+352 / 700
 
-# P1008
-GA1 = bit 12 (2/4)
-GA2 = bit 12 (2/4)
-GA3 = bit 10 (2/4)
-GA4 = bit 7 (1/4)
-=> 700 fils
+# P1023_20UPGM23211432_AfterWirebonding.jpg
+351 / 698
 
-# P1014
-GA1 = bit 7 (1/4)
-GA2 = bit 9 (2/4)
-GA3 = bit 9 (2/4)
-GA4 = bit 13 (1/4)
-=> 609 fils
+# P1024_20UPGM23211820_AfterWirebonding.jpg
+351 / 700
 
+# P1027_20UPGM23211441_AfterBonding.jpg
+349 / 697
+
+# P1033_20UPGM23211444_AfterBonding.jpg
+351 / 700

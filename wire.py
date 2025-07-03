@@ -150,3 +150,20 @@ def wireEdges(wire: list,) -> tuple:
     """
     i_left , i_right = extremeCoords(wire, "left"), extremeCoords(wire, "right")
     return (wire[i_left], wire[i_right])
+
+
+
+# Checking if a wire is touching another
+
+def isTouching(wire: list, threshold = 2900) -> bool:
+    """Tests whether or not a wire is touching another by checking if it contains too many pixels.
+
+    Arguments :
+
+    wire -- list of coordinates : the list of all pixels in the wire
+
+    threshold - int : arbitrary threshold for how many pixels is too many pixels
+
+    Returns : bool
+    """
+    return len(wire) > threshold

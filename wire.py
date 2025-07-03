@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import cv2
 import scipy
 from collections import deque
-
+import json
 
 
 # Utils functions for analyzing pixels in general
@@ -169,65 +169,109 @@ def isTouching(wire: list, threshold = 2900) -> bool:
     return len(wire) > threshold
 
 
+# Extraire le numéro de série d'un module depuis le nom du fichier
+
+def extract_serial_number (file_name) :
+    names = file_name.split("_")
+    for x in names :
+        if "20UPGM" in x :
+            return (x)
+    return (None)
+
+
+# Lire les bits iref codés dans le json
+
+def iref_trim (serialNumber, data) :
+    ok = False
+    for x in data :
+        if x['serialNumber'] == serialNumber :
+            iref = x
+            ok = True
+    assert ok, "serialNumber not found"
+    return (iref['IREF_TRIM_1'], iref['IREF_TRIM_2'], iref['IREF_TRIM_3'], iref['IREF_TRIM_4'])
+
+
+# Donner le nombre de fils attendus pour un certain module
+
+def expected_wire_number (serialNumber, data) :
+    iref = iref_trim(serialNumber, data)
+    nb_wire_per_trim = [4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0]
+    return (693 + nb_wire_per_trim[iref[0]] + nb_wire_per_trim[iref[1]] + nb_wire_per_trim[iref[2]] + nb_wire_per_trim[iref[3]])
+
 
 # Définir une zone verticale de recherche de fils (entre high et low)
 
-def crop_lignes (image_grey) :
-    image_bw = cv2.threshold(image_grey, 127,255,cv2.THRESH_BINARY_INV)[1]
-    n = image_bw.shape[0]
+def crop_lignes (image, level = 0.55) :
+    green = image[:,:,1].sum(axis=1) / (image[:,:,0].sum(axis=1) + image[:,:,2].sum(axis=1))
+    n = image.shape[0]
     limit_high = 0
-    x = image_bw[limit_high].mean()
-    while (limit_high < n//2) and (x <= 150) :
+    x = green[limit_high]
+    while (limit_high < n//2) and (x <= level) :
         limit_high+=1
-        x = image_bw[limit_high].mean()
+        x = green[limit_high]
     limit_low = n-1
-    x = image_bw[limit_low].mean()
-    while (limit_low > n//2) and (x <= 150) :
+    x = green[limit_low]
+    while (limit_low > n//2) and (x <= level) :
         limit_low-=1
-        x = image_bw[limit_low].mean()
-    return (limit_high + 20, limit_low - 30)
+        x = green[limit_low]
+    return (limit_high + 25, limit_low - 22)
 
 
 
-# Compter le nombre de fils à gauche et à droite
+# Compter le nombre de fils sur une colonne
 
-def count (image_grey_crop, column_left, column_right) :
-    peaks_left, _ = scipy.signal.find_peaks(image_grey_crop[:,column_left], distance=3, prominence=50, height=190, width=(0,9))
-    peaks_right, _ = scipy.signal.find_peaks(image_grey_crop[:,column_right], distance=3, prominence=50, height=190, width=(0,9))
-    return (peaks_left.shape[0], peaks_right.shape[0])
+def count (image_grey_crop, column) :
+    peaks, _ = scipy.signal.find_peaks(image_grey_crop[:,column], distance=3, prominence=50, height=190, width=(0,9))
+    return (peaks.shape[0])
 
 
-def crop_colonnes (image_grey_crop, level = 100) :
+def crop_colonnes_left (image_grey_crop, level = 100) :
     n = image_grey_crop.shape[1]
     left = 0
-    right = n-1
-    count_left, count_right = count(image_grey_crop, left, right)
-    while ((count_left < level) or (count_right < level)) and (left < n) and (right > 0) :
-        if (count_left < level) :
-            left += 1
-        if (count_right < level) :
-            right -= 1
-        count_left, count_right = count(image_grey_crop, left, right)
-    return (left, right)
+    count_left = count(image_grey_crop, left)
+    while (count_left < level) and (left < n) :
+        left += 1
+        count_left = count(image_grey_crop, left)
+    return (left)
 
 
-def crop (image_grey) :
-    high, low = crop_lignes(image_grey)
-    grey_cropped_lignes = image_grey[high:low]
-    left, right = crop_colonnes(grey_cropped_lignes)
-    return (high, low, left, right)
+def crop_colonnes_right (image_grey_crop, level = 100) :
+    n = image_grey_crop.shape[1]
+    right = n - 1
+    count_right = count(image_grey_crop, right)
+    while (count_right < level) and (right > 0) :
+        right -= 1
+        count_right = count(image_grey_crop, right)
+    return (right)
 
+
+def test_wire_number_v2 (file_name, data) :
+    expected_nb = expected_wire_number(extract_serial_number(file_name), data)
+    image = cv2.imread("ModulePictures/" + file_name)
+    n = image.shape[1]
+    high_l, low_l = crop_lignes(image[:,:n//2])
+    high_r, low_r = crop_lignes(image[:,n//2:])
+    grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    left = crop_colonnes_left(grey[high_l:low_l])
+    right = crop_colonnes_right(grey[high_r:low_r])
+    real_nb_left = count(grey[high_l:low_l], column = left+35)
+    real_nb_right = count(grey[high_r:low_r], column = right-35)
+    real_nb = real_nb_left + real_nb_right
+    return (expected_nb == real_nb, expected_nb, real_nb)
 
 
 # Donner la position des fils trouvés
 
 def wire_pos (image) :
+    n = image.shape[1]
+    high_l, low_l = crop_lignes(image[:,:n//2])
+    high_r, low_r = crop_lignes(image[:,n//2:])
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    high, low, left, right = crop(grey)
-    grey_crop = grey[high:low]
-    peaks_left, _ = scipy.signal.find_peaks(grey_crop[:,left+35], distance=3, prominence=50, height=190, width=(0,9))
-    peaks_right, _ = scipy.signal.find_peaks(grey_crop[:,right-35], distance=3, prominence=50, height=190, width=(0,9))
-    return(peaks_left + high, left+35, peaks_right + high, right-35)
+    left = crop_colonnes_left(grey[high_l:low_l])
+    right = crop_colonnes_right(grey[high_r:low_r])
+    peaks_left, _ = scipy.signal.find_peaks(grey[high_l:low_l, left+35], distance=3, prominence=50, height=190, width=(0,9))
+    peaks_right, _ = scipy.signal.find_peaks(grey[high_r:low_r, right-35], distance=3, prominence=50, height=190, width=(0,9))
+    return(peaks_left + high_l, left+35, peaks_right + high_r, right-35)
 
 
 

@@ -142,7 +142,7 @@ def crop_columns_right (image_grey_crop, level = 100) :
     return (right)
 
 
-# Useful fonctions
+# Final fonctions
 
 def test_wire_number (file_name, data) :
     """Tests whether the number of wires on a module is correct or not
@@ -163,14 +163,14 @@ def test_wire_number (file_name, data) :
     image = cv2.imread(file_name)
     n = image.shape[1]
 
-    high_l, low_l = crop_ligns(image[:,:n//2])
-    high_r, low_r = crop_ligns(image[:,n//2:])
+    high_left, low_left = crop_ligns(image[:,:n//2])
+    high_right, low_right = crop_ligns(image[:,n//2:])
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    left = crop_columns_left(grey[high_l:low_l])
-    right = crop_columns_right(grey[high_r:low_r])
+    left = crop_columns_left(grey[high_left:low_left])
+    right = crop_columns_right(grey[high_right:low_right])
 
-    real_nb_left = count(grey[high_l:low_l], column = left+35) # +35 : gap between the left limit of the wire zone and the column with every wires
-    real_nb_right = count(grey[high_r:low_r], column = right-35) # -35 : gap between the right limit of the wire zone and the column with every wires
+    real_nb_left = count(grey[high_left:low_left], column = left+35) # +35 : gap between the left limit of the wire zone and the column with every wires
+    real_nb_right = count(grey[high_right:low_right], column = right-35) # -35 : gap between the right limit of the wire zone and the column with every wires
     real_nb = real_nb_left + real_nb_right
     test = expected_nb == real_nb
 
@@ -196,14 +196,14 @@ def wire_pos (image) :
     """
     n = image.shape[1]
 
-    high_l, low_l = crop_ligns(image[:,:n//2])
-    high_r, low_r = crop_ligns(image[:,n//2:])
+    high_left, low_left = crop_ligns(image[:,:n//2])
+    high_right, low_right = crop_ligns(image[:,n//2:])
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    left = crop_columns_left(grey[high_l:low_l])
-    right = crop_columns_right(grey[high_r:low_r])
+    left = crop_columns_left(grey[high_left:low_left])
+    right = crop_columns_right(grey[high_right:low_right])
 
-    peaks_left, _ = scipy.signal.find_peaks(grey[high_l:low_l, left+35], distance=3, prominence=50, height=190, width=(0,9))
-    peaks_right, _ = scipy.signal.find_peaks(grey[high_r:low_r, right-35], distance=3, prominence=50, height=190, width=(0,9))
-    real_peaks_left, real_left, real_peaks_right, real_right = peaks_left + high_l, left+35, peaks_right + high_r, right-35
+    peaks_left, _ = scipy.signal.find_peaks(grey[high_left:low_left, left+35], distance=3, prominence=50, height=190, width=(0,9)) # +35 : gap between the left limit of the wire zone and the column with every wires
+    peaks_right, _ = scipy.signal.find_peaks(grey[high_right:low_right, right-35], distance=3, prominence=50, height=190, width=(0,9)) # -35 : gap between the right limit of the wire zone and the column with every wires
+    real_peaks_left, real_left, real_peaks_right, real_right = peaks_left + high_left, left+35, peaks_right + high_right, right-35 # returning to the coordinates on the original picture
 
     return(real_peaks_left, real_left, real_peaks_right, real_right)

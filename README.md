@@ -18,7 +18,7 @@ Dans le cadre du projet _ATLAS_ du CERN, le département de physique des particu
 
 C'est ici qu'intervient notre projet, qui vise à apporter une aide au contrôle qualité des modules. Concrêtement notre objectif est d'aboutir à une fonction prenant en entrée le nom d'un fichier image contenant une photographie d'un module après câblage, et renvoyant des informations sur le module permetant d'accélerer et d'automatiser le processus de vérification (nombre de câbles attendus en fonction du numéro de série du module, nombre de câbles detectés, mise en évidence des câbles défectueux etc...).
 
-**Répartition des taches et déroulement du projet** :
+**Répartition des tâches et déroulement du projet** :
 
 Pendant la première partie du projet, le groupe s'est séparé en plusieurs sous groupes afin de travailler sur différents aspects du problème.
 
@@ -40,13 +40,17 @@ En définitive nous disposons, à la fin de ces cinq jours de travail, d'une fon
 
 - Une image modifiée du module, où les câbles "problématiques" ont étés mis en surbrillance. Actuellement, le seul critère que nous avons eu le temps d'implémenter est si oui ou non deux câbles sont en contacts (collés ou croisés, car les câbles ne sont pas gainés, ce qui peut donc causer des courts-circuits).
 
-Avec plus de temps à notre disposition, il aurait été possible de renvoyer plus d'information. Par exemple, deux fils en contact ne posent pas de problème s'ils sont reliés au même pad, et donc au même potentiel. Cette information nécessite de combiner les fonctionnalités du troisième groupe avec celles des deux premiers. Idem, on pourrait vérifier que les extrémités des câbles sont bien localisées sur les emplacements des pads, et mettre en surbrillance les câbles repérés comme défectueux.
-
-Cependant, on dispose tout de même d'une fonction `repere_absolu` prenant en entrée le nom d'un fichier image et renvoyant la matrice de passage permetant de revenir à un repère absolu, ainsi que l'origine de ce repère. En plus de cette fonction, les positions des pads dans le repère absolu ont étés relevées, et sont référencées dans le fichier `data.py`.
-
 **Performances** :
 
 - Concernant le fichier qui détermine le repère absolu, on a une variabilité au niveau de la position de l'origine allant jusqu'à 10 pixels dans les pires cas, mais moins en moyenne (environ 2px à 5px), ce qui est acceptable pour la précision que l'on veut sur la position des autres éléments de la carte.
   Pour déterminer la matrice de passage ainsi que l'origine de ce repère, le programme prend quelques secondes à s'exécuter, ce qui est tout à fait raisonnable.
 
 - Concernant le fichier `check_wiring.py`, celui-ci prend quelques minutes à s'exécuter (environ 4 minutes), et marque souvent des fils qui se ne se touchent pas vraiment comme étant en contact. Le contraire en revanche (manquer des fils qui se touchent) n'est pas arrivé à ce stade. Ceci n'est pas problématique donc, car nous visons à assister le travail de l'opérateur qui regarde les cartes à la main à ce stade, pour mettre en surbrillance les zones pententiellement mal câblées.
+
+**Pistes d'amélioration :**
+
+Avec plus de temps à notre disposition, il aurait été possible de renvoyer plus d'information. Par exemple, deux fils en contact ne posent pas de problème s'ils sont reliés au même pad, et donc au même potentiel. Cette information nécessite de combiner les fonctionnalités du troisième groupe avec celles des deux premiers. Idem, on pourrait vérifier que les extrémités des câbles sont bien localisées sur les emplacements des pads, et mettre en surbrillance les câbles repérés comme défectueux.
+
+Cependant, on dispose tout de même d'une fonction `repere_absolu` prenant en entrée le nom d'un fichier image et renvoyant la matrice de passage permetant de revenir à un repère absolu, ainsi que l'origine de ce repère. En plus de cette fonction, les positions des pads dans le repère absolu ont étés relevées, et sont référencées dans le fichier `data.py`.
+
+Plus précisément, dans le fichier `repere_absolu.py`, il serait possible d'améliorer la performance de l'algorithme (déjà assez peu long) en modifiant la manière dont les contours supérieurs et inférieurs du PCB sont déterminés, par un algorithme de parcours de proche en proche par exemple, ou en réduisant le nombre de points et en les faisants plus adaptés à la forme de l'image (le slicing actuel étant purement arbitraire et choisi pour fonctionner sur cartes câblées et non câblées).

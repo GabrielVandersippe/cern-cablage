@@ -1,9 +1,11 @@
-from Coordinates.find_absolute import repere_absolu
+from Coordinates.find_absolute import repere_absolu,find_pads
 import sys
 
 """
 This file is used to find the absolute coordinate system of an image, enabling us to find later on the positions of the pads,... on a
 given image
+
+NB : There also is a function to find the positions of the pads inside "find_absolute.py", it is unused as of now but it works.
 
 Arguments
 -----------

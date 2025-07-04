@@ -11,7 +11,18 @@ def normalize(v):
     return v / norm
 
 ## Fonction pour trouver l'image non câblée à l'image câblée (ou l'inverse)
-def trouver_la_paire(fichier, dossier):
+def trouver_la_paire(fichier:str, dossier:str) -> str :
+    """Finds the image corresponding to a given input
+
+    Arguments :
+
+    fichier - str : the name of the file to look for.
+
+    dossier - str : the folder under which the images are located.
+
+    Returns : str : path to the matching file.
+    """
+
     bname=os.path.basename(fichier)
     if "AfterBonding" in bname:
         name=bname[:bname.find("AfterBonding")]

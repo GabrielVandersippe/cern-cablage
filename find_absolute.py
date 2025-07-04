@@ -8,7 +8,17 @@ from data import *
 
 ## Fonction pour trouver les mires sur l'image non câblée
 
-def mires(img_input, draw = False):
+def mires(img_input:np.ndarray, draw = False):
+    """Finds the positions of the 8 targets on the unwired PCB, or an error if it could not.
+
+    Arguments :
+
+    img_input - array of pixels : the working image (in BGR)
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray : array of centers
+    """
     assert img_input is not None, "file could not be read, check with os.path.exists()" #Vérifier si l'image existe
 
     img = cv.cvtColor(img_input,cv.COLOR_BGR2GRAY) #Mettre en noir et blanc
@@ -59,6 +69,16 @@ def mires(img_input, draw = False):
 #Détection à la main de la frontière supérieure verte :
 
 def horiz_pcb(img,draw=False) :
+    """Finds the position of the top and bottom contour of a given PCB.
+
+    Arguments :
+
+    img - array of pixels : the working image (in BGR)
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray, np.ndarray, float : The slopes, intercepts of both contours, and the average spacing between top and bottom 
+    """
 
     lower_bound = np.array([0, 40, 0])
     upper_bound = np.array([40,110,110])
@@ -110,6 +130,16 @@ def horiz_pcb(img,draw=False) :
 ## Fonction qui trouve la ligne verticale qui est en théorie le fil de cuivre au centre du pcb
 
 def trouve_ligne(img, draw=False):
+    """Finds the position of a vertical wire at the center of the PCB.
+
+    Arguments :
+
+    img - array of pixels : the working image (in BGR)
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : tuple of floats, int, int : average rho and theta found with the Hough Line algorithm ; positions of the cropped image
+    """
     (height,width) = img.shape
 
     img = img[height//3 : height//2, width//2 - 200 : width//2 + 200]
@@ -150,6 +180,21 @@ def trouve_ligne(img, draw=False):
 # Fonction qui calcule la matrice de passage et l'origine du repère absolu pour une image donnée
 
 def matrice_psg(img, draw = False):
+    """Returns the transition matrix of a given image from the coordinate system of the image to the 
+    transitory coordinate system of the image, as well as the origin of the transitory coordinate system
+    and the dilatation of the image.
+    The transitory coordinate system is used to find the positions of the targets in the wired image,
+    thus giving us access to the absolute coordinate system. Its origin is at the intersection of the
+    bottom of the PCB and the vertical wire at the center of the PCB. 
+
+    Arguments :
+
+    img - array of pixels : the working image (in BGR)
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray, np.ndarray, float
+    """
     [rho,theta],alpha,beta = trouve_ligne(cv.cvtColor(img,cv.COLOR_BGR2GRAY), draw)
     [_,c],[_,d], dilatation = horiz_pcb(img, draw) #Droite horizontale y = cx + d
 
@@ -179,7 +224,17 @@ def matrice_psg(img, draw = False):
 
 
 def mires_cablees(path, draw = False):
+    """Finds the positions of the targets on a wired PCB.
 
+    Arguments :
+
+    path - string : the path to the wired image.
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray : array of new centers.
+    """
+    
     ## Récupération du couple d'images
     img_cablee = cv.imread(path)
     img_non_cablee = cv.imread('ModulePictures/' + trouver_la_paire(path,"ModulePictures"))
@@ -211,6 +266,18 @@ def mires_cablees(path, draw = False):
 ## Fonction qui renvoie le repère absolu de l'image câblée
 
 def repere_absolu(path, draw = False):
+    """Returns the transition matrix to the absolute coordinate system, as well as its origin
+    and the dilatation factor.
+
+    Arguments :
+
+    path - string : the path to the wired image.
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray, np.ndarray, float
+    """
+
     ## Fonction précédente
     centres = mires_cablees(path, draw)
 
@@ -234,6 +301,17 @@ def repere_absolu(path, draw = False):
 ## TODO : importer les positions absolues des pads depuis le ficher JSON, et dilat_ref
 
 def find_pads(path, draw=False):
+    """Returns the positions of the pads on any given wired board.
+
+    Arguments :
+
+    path - string : the path to the wired image.
+
+    draw - bool : whether or not the function should return images of what it is doing.
+
+    Returns : np.ndarray : array of pads
+    """
+
     mat, origine, dilat_measured = repere_absolu(path, draw)
 
     dilatation = dilat_measured/dilat_ref

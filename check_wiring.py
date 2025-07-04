@@ -1,0 +1,6 @@
+from wire import analyseWires
+import sys
+
+if __name__ == '__main__' :
+    path = sys.argv[1]
+    analyseWires(path)

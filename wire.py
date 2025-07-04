@@ -207,7 +207,3 @@ def analyseWires(filename: str):
     print("Wires expected : " + str(n_expected))
     print("Wires detected : " + str(n_detected))
 
-
-# Testing
-
-analyseWires("1005_20UPGM23211816_AfterBonding.jpg")

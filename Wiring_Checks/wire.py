@@ -195,8 +195,8 @@ def analyseWires(filename: str):
     n_detected = len(x_list_left) + len(x_list_right)
     for (x_list, y) in [(x_list_left,y_left),(x_list_right,y_right)]:
         for x in x_list:
-            print("Status : " + str(int(100 * count/n_detected)) + " %")
-            print("Time spent : " + str(int(time() - t)) + "seconds")
+            #print("Status : " + str(int(100 * count/n_detected)) + " %")
+            #print("Time spent : " + str(int(time() - t)) + "seconds")
             count+=1
             wire = bfsWire(img,(x,y))
             if isTouching(wire):

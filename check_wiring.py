@@ -1,4 +1,4 @@
-from wire import analyseWires
+from Wiring_Checks.wire import analyseWires
 import sys
 
 if __name__ == '__main__' :

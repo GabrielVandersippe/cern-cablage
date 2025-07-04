@@ -5,7 +5,7 @@ import scipy
 from collections import deque
 import json
 
-with open("iref_trim_per_module.json", "r") as f:
+with open("cern-cablage\\iref_trim_per_module.json", "r") as f:
     data = json.load(f)
 
 # Utils functions for analyzing pixels in general
@@ -277,27 +277,33 @@ def wire_pos (image) :
 
 
 
-# Combining start pixel detection and wire plotting
+# Combining start pixel detection, wire counting and wire plotting
 
-def analyseWires(img: np.ndarray):
+
+def analyseWires(filename: str):
     """Highlights all the wires in an image, with different colors if a pixel is touching another.
 
     Arguments : 
 
-    img - array of pixels : the working image
+    filename - str : the file name of the working image
     """
+    img = plt.imread(filename)
+    n_expected = expected_wire_number(extract_serial_number(filename),data)
     copy = img.copy()
     (x_list_left,y_left,x_list_right,y_right) = wire_pos(img)
+    n_detected = len(x_list_left) + len(x_list_right)
     for (x_list, y) in [(x_list_left,y_left),(x_list_right,y_right)]:
         for x in x_list:
             wire = bfsWire(img,(x,y))
             if isTouching(wire):
                 for pixel in wire:
                     copy[pixel[0],pixel[1],:] = np.array([0,0,255])
-            else:
-                for pixel in wire:
-                    copy[pixel[0],pixel[1],:] = np.array([255,0,0])
             edges = wireEdges(wire)
-            copy[edges[0][0],edges[0][1],:] = np.array([0,255,0])
-            copy[edges[1][0],edges[1][1],:] = np.array([0,255,0])
     cv2.imwrite("result.jpg",copy)
+    print("Wires expected : " + str(n_expected))
+    print("Wires detected : " + str(n_detected))
+
+
+# Testing
+
+analyseWires("cern-cablage\\1005_20UPGM23211816_AfterBonding.jpg")

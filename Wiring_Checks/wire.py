@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
-import scipy
 from collections import deque
 import json
 from time import time
@@ -188,7 +186,7 @@ def analyseWires(filename: str):
     """
     count = 0
     t = time()
-    img = plt.imread(filename)
+    img = cv2.imread(filename)
     n_expected = expected_wire_number(extract_serial_number(filename),data)
     copy = img.copy()
     (x_list_left,y_left,x_list_right,y_right) = wire_pos(img)
@@ -206,4 +204,3 @@ def analyseWires(filename: str):
     cv2.imwrite("result.jpg",copy)
     print("Wires expected : " + str(n_expected))
     print("Wires detected : " + str(n_detected))
-

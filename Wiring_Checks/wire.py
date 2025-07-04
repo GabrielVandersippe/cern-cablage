@@ -204,5 +204,3 @@ def analyseWires(filename: str):
     cv2.imwrite("result.jpg",copy)
     print("Wires expected : " + str(n_expected))
     print("Wires detected : " + str(n_detected))
-
-analyseWires("1005_20UPGM23211816_AfterBonding.jpg")

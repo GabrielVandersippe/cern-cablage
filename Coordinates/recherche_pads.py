@@ -1,21 +1,13 @@
 ### Imports
 
-import wire.py
-
 import numpy as np
 import pandas as pd
 import cv2 as cv
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import imutils
-import scipy.stats as stats
-import statistics
-import os
-from collections import deque
 
 
-
-### Fonctions utiles ###
+### Fonction utile ###
 
 def norme(pix):         
     
@@ -24,40 +16,12 @@ def norme(pix):
     return np.sqrt((pix[0]/255)**2+(pix[1]/255)**2+(pix[2]/255)**2)
 
 
-def tourner_image(image, pente):        
-    
-    # recadrer l'image à partir des pentes des bords
-    
-    return imutils.rotate(image, np.arctan(pente))
-
-
-def trouver_la_paire(fichier, dossier):         
-    
-    # Trouver le module non câblé à partir du câblé et inversement
-    
-    bname=os.path.basename(fichier)
-    if "After" in bname:
-        name=bname[:bname.find("After")]
-        for f in os.listdir(dossier):
-            if "Reception" in os.path.basename(f):
-                if os.path.basename(f)[:os.path.basename(f).find("Reception")]==name:
-                    return f
-    elif "Reception" in bname:
-        name=bname[:bname.find("Reception")]
-        for f in os.listdir(dossier):
-            if "After" in os.path.basename(f):
-                if os.path.basename(f)[:os.path.basename(f).find("After")]==name:
-                    return f
-    return "Pas de paire"
-
-
 ### Trouver les pads sur la puce ###
 
 # Les trouver
 def trouver_pads_chip(image):
     # Entrée : image cropée contenant uniquement la zone des pads (obtenable grâce au repère absolu de Gabriel)
     # Sortie : nombre de pads et zones de chaque pads 
-
 
     pads=0
     zones=[]

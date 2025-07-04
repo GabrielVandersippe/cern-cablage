@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from utils import *
-from data import *
+from Coordinates.utils import *
+from Coordinates.data import *
 
 
 ## Fonction pour trouver les mires sur l'image non câblée

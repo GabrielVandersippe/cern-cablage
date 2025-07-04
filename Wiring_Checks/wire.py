@@ -6,7 +6,7 @@ from collections import deque
 import json
 from time import time
 
-from count import expected_wire_number, extract_serial_number, wire_pos
+from Wiring_Checks.count import expected_wire_number, extract_serial_number, wire_pos
 
 # open the json with the iref for each module
 

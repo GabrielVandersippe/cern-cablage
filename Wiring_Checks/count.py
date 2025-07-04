@@ -16,7 +16,10 @@ def extract_serial_number (file_name) :
     names = file_name.split("_")
     for x in names :
         if "20UPGM" in x :
-            return (x)
+            if "/" in x :
+                return(x.split("/")[-1])
+            else :
+                return (x)
     assert False, "No serial number found in the file name"
 
 

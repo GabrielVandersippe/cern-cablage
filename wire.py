@@ -7,7 +7,7 @@ import json
 
 # open the json with the iref for each module
 
-with open("iref_trim_per_module.json", "r") as f:
+with open(".\iref_trim_per_module.json", "r") as f:
     data = json.load(f)
 
 # Utils functions for analyzing pixels in general
@@ -410,4 +410,4 @@ def analyseWires(filename: str):
 
 # Testing
 
-analyseWires("cern-cablage\\1005_20UPGM23211816_AfterBonding.jpg")
+analyseWires("1005_20UPGM23211816_AfterBonding.jpg")

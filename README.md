@@ -18,7 +18,7 @@ Dans le cadre du projet _ATLAS_ du CERN, le département de physique des particu
 
 C'est ici qu'intervient notre projet, qui vise à apporter une aide au contrôle qualité des modules. Concrêtement notre objectif est d'aboutir à une fonction prenant en entrée le nom d'un fichier image contenant une photographie d'un module après câblage, et renvoyant des informations sur le module permetant d'accélerer et d'automatiser le processus de vérification (nombre de câbles attendus en fonction du numéro de série du module, nombre de câbles detectés, mise en évidence des câbles défectueux etc...).
 
-**Répartition des taches et déroulement du projet** :
+**Répartition des tâches et déroulement du projet** :
 
 Pendant la première partie du projet, le groupe s'est séparé en plusieurs sous groupes afin de travailler sur différents aspects du problème.
 

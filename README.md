@@ -9,8 +9,11 @@ Gabriel Vandersippe, Lucas Duhautois, Mathieu Jousson, Matthieu Benoit, Aurélie
 Aller dans le terminal (de préférence _Powershell_ pour avoir la progression du rendu affichée en temps réel), et entrer :
 
 ```
-python check_wiring.py "ModulePictures/place_holder.jpg"
+python check_wiring.py "ModulePictures/placeholder.jpg"
+python absolute_coordinates.py "ModulePictures/placeholder.jpg"
 ```
+
+En remplaçant `placeholder` par un fichier _câblé_ (contient "_Afterbonding_" ou "_Afterwirebonding_" dans son nom.) afin de compter les câbles sur un puce qui en contient. Certains fichiers sont volontairement choisis pour avoir des exemples d'images qui ne fonctionnent pas, et le ratio d'images avec un rendu inattendu est ainsi volontairement anormalement élevé.
 
 **Contexte du projet** :
 

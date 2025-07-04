@@ -209,3 +209,21 @@ def wire_pos (image) :
     real_peaks_left, real_left, real_peaks_right, real_right = peaks_left + high_left, left+35, peaks_right + high_right, right-35 # returning to the coordinates on the original picture
 
     return(real_peaks_left, real_left, real_peaks_right, real_right)
+
+def test_wire_finding (file_name) :
+    """Tests the wire finding algorithm by creating a test image with the detected wires marked by a black pixel
+
+    Arguments :
+
+    file_name - string : name of the file (the image must be in the same folder as this programm)
+
+    Returns : None
+    """
+    image = cv2.imread(file_name)
+    image2 = image.copy()
+    test_left, left, test_right, right = wire_pos(image)
+    for x in test_left :
+        image2[x, left] = [0, 0, 0]
+    for x in test_right :
+        image2[x, right] = [0, 0, 0]
+    cv2.imwrite('test.jpg',image2)

@@ -4,12 +4,13 @@ import cv2
 import scipy
 from collections import deque
 import json
+from time import time
 
 from count import expected_wire_number, extract_serial_number, wire_pos
 
 # open the json with the iref for each module
 
-with open(".\iref_trim_per_module.json", "r") as f:
+with open("iref_trim_per_module.json", "r") as f:
     data = json.load(f)
 
 # Utils functions for analyzing pixels in general
@@ -186,6 +187,7 @@ def analyseWires(filename: str):
     filename - str : the file name of the working image
     """
     count = 0
+    t = time()
     img = plt.imread(filename)
     n_expected = expected_wire_number(extract_serial_number(filename),data)
     copy = img.copy()
@@ -194,6 +196,7 @@ def analyseWires(filename: str):
     for (x_list, y) in [(x_list_left,y_left),(x_list_right,y_right)]:
         for x in x_list:
             print("Status : " + str(int(100 * count/n_detected)) + " %")
+            print("Time spent : " + str(int(time() - t)) + "seconds")
             count+=1
             wire = bfsWire(img,(x,y))
             if isTouching(wire):

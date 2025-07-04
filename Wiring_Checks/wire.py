@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
 from collections import deque
 import json
 from time import time
@@ -24,7 +25,7 @@ def norm(pix: np.ndarray) -> float:
     return float(pix[0])**2 + float(pix[1])**2 + float(pix[2])**2
 
 
-def isWhite(img: np.ndarray, coord: tuple, threshold = 90000) -> bool:
+def isWhite(img: np.ndarray, coord: tuple, threshold = 100000) -> bool:
     """Tests whether or not a pixel is considered white, using an arbitrary threshold.
 
     Arguments :
@@ -68,7 +69,7 @@ def neighboursList(img: np.ndarray, coord: tuple) -> list:
 
     Returns : list of coordinates
     """
-    directions_list = [(1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)]
+    directions_list = [(1,0),(-1,0),(0,1),(0,-1)]
     neighbours_list = []
     for direction in directions_list:
         neighbour_coord = (coord[0] + direction[0], coord[1] + direction[1])
@@ -139,7 +140,7 @@ def extremeCoords(wire: list, side = "left") -> int:
     directions = {"left":-1, "right":1}
     index = 0
     for i in range(1,len(wire)):
-        if directions[side] * (wire[i][1] - wire[index][1]) < 0:
+        if directions[side] * (wire[i][1] - wire[index][1]) > 0:
             index = i
     return index
 
@@ -186,7 +187,7 @@ def analyseWires(filename: str):
     """
     count = 0
     t = time()
-    img = cv2.imread(filename)
+    img = plt.imread(filename)
     n_expected = expected_wire_number(extract_serial_number(filename),data)
     copy = img.copy()
     (x_list_left,y_left,x_list_right,y_right) = wire_pos(img)

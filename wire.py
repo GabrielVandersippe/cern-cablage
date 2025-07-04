@@ -5,6 +5,8 @@ import scipy
 from collections import deque
 import json
 
+# open the json with the iref for each module
+
 with open("iref_trim_per_module.json", "r") as f:
     data = json.load(f)
 
@@ -171,63 +173,117 @@ def isTouching(wire: list, threshold = 2900) -> bool:
     return len(wire) > threshold
 
 
-# Extraire le numéro de série d'un module depuis le nom du fichier
+# Theoretical number of wires
 
 def extract_serial_number (file_name) :
+    """Extracts the serial number (starting with 20UPGM) of a module
+
+    Arguments :
+
+    file_name - string : name of the file with the serial number in it
+
+    Returns : string
+    """
     names = file_name.split("_")
     for x in names :
         if "20UPGM" in x :
             return (x)
-    return (None)
+    assert False, "No serial number found in the file name"
 
 
-# Lire les bits iref codés dans le json
+def iref_trim (serial_number, data) :
+    """Reads the iref of a module
 
-def iref_trim (serialNumber, data) :
+    Arguments :
+
+    serial_number - string : serial number of the module
+
+    data - list[dict] : iref of each module
+
+    Returns : (int, int, int, int)
+    """
     ok = False
     for x in data :
-        if x['serialNumber'] == serialNumber :
+        if x['serialNumber'] == serial_number :
             iref = x
             ok = True
-    assert ok, "serialNumber not found"
+    assert ok, "Serial number not found"
     return (iref['IREF_TRIM_1'], iref['IREF_TRIM_2'], iref['IREF_TRIM_3'], iref['IREF_TRIM_4'])
 
 
-# Donner le nombre de fils attendus pour un certain module
+def expected_wire_number (serial_number, data) :
+    """Calculates the theoretical number of wires of a module
 
-def expected_wire_number (serialNumber, data) :
-    iref = iref_trim(serialNumber, data)
-    nb_wire_per_trim = [4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0]
-    return (693 + nb_wire_per_trim[iref[0]] + nb_wire_per_trim[iref[1]] + nb_wire_per_trim[iref[2]] + nb_wire_per_trim[iref[3]])
+    Arguments :
+
+    serial_number - string : serial number of the module
+
+    data - list[dict] : iref of each module
+
+    Returns : int
+    """
+    iref = iref_trim(serial_number, data)
+    nb_wire_per_trim = [4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0] # number of wires expected depending on iref
+    return (693 + nb_wire_per_trim[iref[0]] + nb_wire_per_trim[iref[1]] + nb_wire_per_trim[iref[2]] + nb_wire_per_trim[iref[3]]) # 693 wires independant of iref + number of iref wires
 
 
-# Définir une zone verticale de recherche de fils (entre high et low)
+# Counting the real number of wires
 
-def crop_lignes (image, level = 0.55) :
+def crop_ligns (image, level = 0.55) :
+    """Determines the limits of the vertical zone of interest of the picture
+
+    Arguments :
+
+    image - array of pixels : the working image
+
+    level (optional) - int : limit of greenness before the algorithm stops
+
+    Returns : (int, int)
+    """
     green = image[:,:,1].sum(axis=1) / (image[:,:,0].sum(axis=1) + image[:,:,2].sum(axis=1))
     n = image.shape[0]
+
     limit_high = 0
     x = green[limit_high]
     while (limit_high < n//2) and (x <= level) :
         limit_high+=1
         x = green[limit_high]
+    
     limit_low = n-1
     x = green[limit_low]
     while (limit_low > n//2) and (x <= level) :
         limit_low-=1
         x = green[limit_low]
-    return (limit_high + 25, limit_low - 22)
+    
+    return (limit_high + 25, limit_low - 22) # +25 and -22 : gaps between the green area and the wire zone
 
-
-
-# Compter le nombre de fils sur une colonne
 
 def count (image_grey_crop, column) :
-    peaks, _ = scipy.signal.find_peaks(image_grey_crop[:,column], distance=3, prominence=50, height=190, width=(0,9))
+    """Count the number of wires in a specific column
+
+    Arguments :
+
+    image_grey_crop - array of pixels : the working greyscale image, cropped vertically
+
+    column - int : column of interest
+
+    Returns : int
+    """
+    peaks, _ = scipy.signal.find_peaks(image_grey_crop[:,column], distance=3, prominence=50, height=190, width=(0,9)) # appropriate parameters were determined with already existing datasets
     return (peaks.shape[0])
 
 
-def crop_colonnes_left (image_grey_crop, level = 100) :
+def crop_columns_left (image_grey_crop, level = 100) :
+    """Determines the left limit of the wire zone
+
+    Arguments :
+
+    image_grey_crop - array of pixels : the working greyscale image, cropped vertically
+
+    level (optionnal) - int : number of wires required before the algorithm stops
+
+    Returns : int
+    """
     n = image_grey_crop.shape[1]
     left = 0
     count_left = count(image_grey_crop, left)
@@ -237,7 +293,17 @@ def crop_colonnes_left (image_grey_crop, level = 100) :
     return (left)
 
 
-def crop_colonnes_right (image_grey_crop, level = 100) :
+def crop_columns_right (image_grey_crop, level = 100) :
+    """Determines the right limit of the wire zone
+
+    Arguments :
+
+    image_grey_crop - array of pixels : the working greyscale image, cropped vertically
+
+    level (optionnal) - int : number of wires required before the algorithm stops
+
+    Returns : int
+    """
     n = image_grey_crop.shape[1]
     right = n - 1
     count_right = count(image_grey_crop, right)
@@ -247,33 +313,71 @@ def crop_colonnes_right (image_grey_crop, level = 100) :
     return (right)
 
 
-def test_wire_number (file_name, folder, data) :
+# Useful fonctions
+
+def test_wire_number (file_name, data) :
+    """Tests whether the number of wires on a module is correct or not
+
+    Arguments :
+
+    file_name - string : name of the file (the image must be in the same folder as this programm)
+
+    data - list[dict] : iref of each module
+
+    Returns : 
+    test - bool : True if the number of wires is correct, False otherwise
+    expected_nb - int : theoretical number of wires
+    real_nb - int : number of wires counted
+    """
     expected_nb = expected_wire_number(extract_serial_number(file_name), data)
-    image = cv2.imread(folder + "/" + file_name)
+
+    image = cv2.imread(file_name)
     n = image.shape[1]
-    high_l, low_l = crop_lignes(image[:,:n//2])
-    high_r, low_r = crop_lignes(image[:,n//2:])
+
+    high_l, low_l = crop_ligns(image[:,:n//2])
+    high_r, low_r = crop_ligns(image[:,n//2:])
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    left = crop_colonnes_left(grey[high_l:low_l])
-    right = crop_colonnes_right(grey[high_r:low_r])
-    real_nb_left = count(grey[high_l:low_l], column = left+35)
-    real_nb_right = count(grey[high_r:low_r], column = right-35)
+    left = crop_columns_left(grey[high_l:low_l])
+    right = crop_columns_right(grey[high_r:low_r])
+
+    real_nb_left = count(grey[high_l:low_l], column = left+35) # +35 : gap between the left limit of the wire zone and the column with every wires
+    real_nb_right = count(grey[high_r:low_r], column = right-35) # -35 : gap between the right limit of the wire zone and the column with every wires
     real_nb = real_nb_left + real_nb_right
-    return (expected_nb == real_nb, expected_nb, real_nb)
+    test = expected_nb == real_nb
 
+    return (test, expected_nb, real_nb)
 
-# Donner la position des fils trouvés
 
 def wire_pos (image) :
+    """Gives the position of every wire detected
+
+    Arguments :
+
+    image - array of pixels : the working image
+
+    Returns :
+    
+    real_peaks_left - array of int : the ordinates of the wires on the left side
+
+    real_left - int : the abscissa of the wires on the left side (same for all wires)
+
+    real_peaks_right - array of int : the ordinates of the wires on the right side
+
+    real_right - int : the abscissa of the wires on the right side (same for all wires)
+    """
     n = image.shape[1]
-    high_l, low_l = crop_lignes(image[:,:n//2])
-    high_r, low_r = crop_lignes(image[:,n//2:])
+
+    high_l, low_l = crop_ligns(image[:,:n//2])
+    high_r, low_r = crop_ligns(image[:,n//2:])
     grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    left = crop_colonnes_left(grey[high_l:low_l])
-    right = crop_colonnes_right(grey[high_r:low_r])
+    left = crop_columns_left(grey[high_l:low_l])
+    right = crop_columns_right(grey[high_r:low_r])
+
     peaks_left, _ = scipy.signal.find_peaks(grey[high_l:low_l, left+35], distance=3, prominence=50, height=190, width=(0,9))
     peaks_right, _ = scipy.signal.find_peaks(grey[high_r:low_r, right-35], distance=3, prominence=50, height=190, width=(0,9))
-    return(peaks_left + high_l, left+35, peaks_right + high_r, right-35)
+    real_peaks_left, real_left, real_peaks_right, real_right = peaks_left + high_l, left+35, peaks_right + high_r, right-35
+
+    return(real_peaks_left, real_left, real_peaks_right, real_right)
 
 
 

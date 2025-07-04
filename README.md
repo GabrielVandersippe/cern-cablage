@@ -44,3 +44,8 @@ En définitive nous disposons, à la fin de ces cinq jours de travail, d'une fon
 Avec plus de temps à notre disposition, il aurait été possible de renvoyer plus d'information. Par exemple, deux fils en contact ne posent pas de problème s'ils sont reliés au même pad, et donc au même potentiel. Cette information nécessite de combiner les fonctionnalités du troisième groupe avec celles des deux premiers. Idem, on pourrait vérifier que les extrémités des cables sont bien localisées sur les emplacements des pads, et mettre en surbrillance les cables repérés comme défectueux.
 
 Cependant, on dispose tout de même d'une fonction `repere_absolu` prenant en entrée le nom d'un fichier image et renvoyant la matrice de passage permetant de revenir à un repère absolu, ainsi que l'origine de ce repère. En plus de cette fonction, les positions des pads dans le repère absolu ont étés relevées, et sont référencées dans le fichier `data.py`.
+
+
+**Performances** :
+
+Quoicoubeh

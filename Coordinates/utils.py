@@ -24,8 +24,8 @@ def trouver_la_paire(fichier:str, dossier:str) -> str :
     """
 
     bname=os.path.basename(fichier)
-    if "AfterBonding" in bname:
-        name=bname[:bname.find("AfterBonding")]
+    if "After" in bname:
+        name=bname[:bname.find("After")]
         for f in os.listdir(dossier):
             if "Reception" in os.path.basename(f):
                 if os.path.basename(f)[:os.path.basename(f).find("Reception")]==name:
@@ -33,8 +33,8 @@ def trouver_la_paire(fichier:str, dossier:str) -> str :
     elif "Reception" in bname:
         name=bname[:bname.find("Reception")]
         for f in os.listdir(dossier):
-            if "AfterBonding" in os.path.basename(f):
-                if os.path.basename(f)[:os.path.basename(f).find("AfterBonding")]==name:
+            if "After" in os.path.basename(f):
+                if os.path.basename(f)[:os.path.basename(f).find("After")]==name:
                     return f
     return "Pas de paire"
 

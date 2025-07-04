@@ -1,15 +1,12 @@
 ### Imports
 
-import wire.py
+from Wiring_Checks.wire import isWhite, bfsWire
 
 import numpy as np
 import pandas as pd
 import cv2 as cv
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import imutils
-import os
-from collections import deque
 
 
 
@@ -20,36 +17,6 @@ def norme(pix):
     # comprise entre 0 et racine de 3
     
     return np.sqrt((pix[0]/255)**2+(pix[1]/255)**2+(pix[2]/255)**2)
-
-
-def tourner_image(image, pente):        
-    
-    # recadrer l'image à partir des pentes des bords
-    
-    return imutils.rotate(image, np.arctan(pente))
-
-
-def trouver_la_paire(fichier, dossier):         
-    
-    # Trouver le module non câblé à partir du câblé et inversement
-    
-    bname=os.path.basename(fichier)
-    if "After" in bname:
-        name=bname[:bname.find("After")]
-        for f in os.listdir(dossier):
-            if "Reception" in os.path.basename(f):
-                if os.path.basename(f)[:os.path.basename(f).find("Reception")]==name:
-                    return f
-    elif "Reception" in bname:
-        name=bname[:bname.find("Reception")]
-        for f in os.listdir(dossier):
-            if "After" in os.path.basename(f):
-                if os.path.basename(f)[:os.path.basename(f).find("After")]==name:
-                    return f
-    return "Pas de paire"
-
-
-
 
 
 
